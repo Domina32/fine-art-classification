@@ -70,7 +70,7 @@ class CustomWikiartDataset(CustomDataset):
     def generator(self):
         with open(os.path.join(self.file_length_map_json_path, "file_length_map.json"), "r") as file_id_map:
             map_dict = json.load(file_id_map)
-            for file_name, file_length in map_dict.items():
+            for file_name in map_dict:
                 for chunk in pd.read_csv(f"{self.data_path}/csv/" + file_name, chunksize=self.chunk_size):
                     image_arrays, labels = [], []
                     image_arrays = (
@@ -85,6 +85,10 @@ class CustomWikiartDataset(CustomDataset):
                         ).values
                     )
                     labels = chunk[self.chosen_label].values  # .decode('utf-8')
+
+                    if self.chunk_size == 1:
+                        for row in range(self.chunk_size):
+                            yield (image_arrays[row], labels[row])
 
                     yield (
                         image_arrays,

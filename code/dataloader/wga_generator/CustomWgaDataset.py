@@ -44,4 +44,8 @@ class CustomWgaDataset(CustomDataset):
 
             labels = self.data["labels"][slice_start:slice_end]
 
+            if self.chunk_size == 1:
+                for row in range(self.chunk_size):
+                    yield (image_arrays[row], labels[row])
+
             yield (image_arrays, np.asarray(labels))

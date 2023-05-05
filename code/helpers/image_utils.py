@@ -15,7 +15,7 @@ from skimage import io
 
 def resize_img(img, new_width=300, new_height=300):
     """Resize an image using new  width and height"""
-    new_points = (new_width, new_height)
+    new_points = [new_width, new_height]
 
     return fn.resize(img, new_points, torchvision.transforms.InterpolationMode.BILINEAR, antialias=True)
 

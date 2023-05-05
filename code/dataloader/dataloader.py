@@ -1,6 +1,10 @@
+import os
+from pathlib import Path
+
 from torch.utils.data import Dataset
 
-local_DATA_PATH = "/home/rudovc/Git/dome/fine_art_classification/data"  # "./data"
+current_dir = Path(__file__).parent
+local_DATA_PATH = os.path.join(current_dir.parent.parent, 'data')
 
 DEFAULT_IN_SHAPE = (3, 300, 300)
 
@@ -26,3 +30,4 @@ class CustomDataset(Dataset):
 
     def generator(self):
         raise NotImplementedError()
+
