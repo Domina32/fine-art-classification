@@ -1,15 +1,18 @@
+from code.dataloader.wga_generator.CustomWgaDataset import CustomWgaDataset
 from code.dataloader.wikiart_generator.CustomWikiartDataset import CustomWikiartDataset
 
 
 def main():
-    dataset = CustomWikiartDataset(chunk_size=3)
-    # print(dataset.length)
-    # print(dataset.data_path)
+    wga_dataset = CustomWgaDataset(chunk_size=3)
+    wikiart_dataset = CustomWikiartDataset(chunk_size=3)
 
-    # for i, chunk in enumerate(dataset):
-    #     if i > 0:
+    # for i, chunk in enumerate(wga_dataset):
+    #     if i > 2:
     #         break
-    #     print(chunk)
+
+    #     if i == 0:
+    #         image = np.swapaxes(np.swapaxes(chunk[0][0], 0, 1), 1, 2)
+    #         pass
 
     return
 

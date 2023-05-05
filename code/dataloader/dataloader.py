@@ -2,6 +2,8 @@ from torch.utils.data import Dataset
 
 local_DATA_PATH = "/home/rudovc/Git/dome/fine_art_classification/data"  # "./data"
 
+DEFAULT_IN_SHAPE = (3, 300, 300)
+
 
 class CustomDataset(Dataset):
     def __init__(
@@ -13,7 +15,7 @@ class CustomDataset(Dataset):
         self.data_path = DATA_PATH
         self.chosen_label = chosen_label
         self.chunk_size = chunk_size
-        self.in_shape = (300, 300, 3)
+        self.in_shape = DEFAULT_IN_SHAPE
         self.length = 0
 
     def __len__(self):

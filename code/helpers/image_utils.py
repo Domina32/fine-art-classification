@@ -22,7 +22,6 @@ def resize_img(img, new_width=300, new_height=300):
 
 def change_channels(img):
     """Change image color channels from BGR to RGB"""
-    print(type(img.numpy()))
     return cv2.cvtColor(img, cv2.COLOR_BGR2RGBA)
 
 
