@@ -1,27 +1,28 @@
 import cv2
-from skimage import io
 import numpy as np
-
-# import torchvision.transforms.functional as fn
+import torchvision
+import torchvision.transforms.functional as fn
+from skimage import io
 
 ############ COMMON
+
+
+# def resize_img(img, new_width=300, new_height=300):
+#     """Resize an image using new  width and height"""
+#     new_points = (new_width, new_height)
+#     return cv2.resize(img, new_points, interpolation=cv2.INTER_LINEAR)
 
 
 def resize_img(img, new_width=300, new_height=300):
     """Resize an image using new  width and height"""
     new_points = (new_width, new_height)
-    return cv2.resize(img, new_points, interpolation=cv2.INTER_LINEAR)
 
-
-# def resize_img(img, new_width, new_height):
-#     """Resize an image using new  width and height"""
-#     new_points = (new_width, new_height)
-
-#     return fn.resize(img, new_points, torchvision.transforms.InterpolationMode.BILINEAR, antialias=True)
+    return fn.resize(img, new_points, torchvision.transforms.InterpolationMode.BILINEAR, antialias=True)
 
 
 def change_channels(img):
     """Change image color channels from BGR to RGB"""
+    print(type(img.numpy()))
     return cv2.cvtColor(img, cv2.COLOR_BGR2RGBA)
 
 
