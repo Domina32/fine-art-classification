@@ -5,6 +5,7 @@ from typing import Literal
 
 import numpy as np
 import torch
+from torchvision.transforms import functional as fn
 
 
 class CustomWgaDataset(CustomDataset):
@@ -19,7 +20,7 @@ class CustomWgaDataset(CustomDataset):
         self.data_path = PurePath(self.data_path, WGA_DATA_PATH)
         self.data: dict[Literal["images", "labels"], np.ndarray] = {
             "images": np.load(os.path.join(self.data_path, "wga_images.npy"), mmap_mode="r"),
-            "labels": np.load(os.path.join(self.data_path, "wga_labels.npy")),
+            "labels": np.load(os.path.join(self.data_path, "wga_labels.npy"), mmap_mode="r"),
         }
 
         self.length = len(self.data["labels"])
@@ -28,7 +29,7 @@ class CustomWgaDataset(CustomDataset):
         return self.length
 
     def __getitem__(self, raw_row_id):
-        return (torch.tensor(self.data["images"][raw_row_id]).permute(2, 0, 1), (self.data["labels"][raw_row_id]))
+        return (fn.to_tensor(self.data["images"][raw_row_id]), self.data["labels"][raw_row_id])
 
     def __iter__(self):
         return self.generator()
@@ -39,13 +40,13 @@ class CustomWgaDataset(CustomDataset):
             image_arrays = np.empty((self.chunk_size, *self.in_shape), dtype=np.uint8)
 
             for index, image_array in enumerate(self.data["images"][slice_start:slice_end]):
-                tensor = torch.tensor(image_array).permute(2, 0, 1)
+                tensor = fn.to_tensor(image_array)
                 image_arrays[index] = tensor
 
             labels = self.data["labels"][slice_start:slice_end]
 
             if self.chunk_size == 1:
                 for row in range(self.chunk_size):
-                    yield (image_arrays[row], labels[row])
+                    yield (torch.tensor(image_arrays[row]), labels[row])
 
             yield (image_arrays, np.asarray(labels))

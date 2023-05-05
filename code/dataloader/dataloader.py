@@ -1,10 +1,11 @@
 import os
 from pathlib import Path
 
-from torch.utils.data import Dataset
+import numpy as np
+from torch.utils.data import DataLoader, Dataset, SubsetRandomSampler
 
 current_dir = Path(__file__).parent
-local_DATA_PATH = os.path.join(current_dir.parent.parent, 'data')
+local_DATA_PATH = os.path.join(current_dir.parent.parent, "data")
 
 DEFAULT_IN_SHAPE = (3, 300, 300)
 
@@ -31,3 +32,28 @@ class CustomDataset(Dataset):
     def generator(self):
         raise NotImplementedError()
 
+
+BATCH_SIZE = 16
+TEST_SPLIT = 0.1
+SHUFFLE = True
+RANDOM_SEED = 32
+
+
+def split_dataset(
+    dataset: CustomDataset, test_split=TEST_SPLIT, batch_size=BATCH_SIZE, shuffle=SHUFFLE, random_seed=RANDOM_SEED
+):
+    dataset_size = dataset.length
+    indices = list(range(dataset_size))
+    split = int(np.floor(TEST_SPLIT * dataset_size))
+    if SHUFFLE:
+        np.random.seed(RANDOM_SEED)
+        np.random.shuffle(indices)
+    train_indices, test_indices = indices[split:], indices[:split]
+
+    train_sampler = SubsetRandomSampler(train_indices)
+    test_sampler = SubsetRandomSampler(test_indices)
+
+    train_loader = DataLoader(dataset, batch_size=BATCH_SIZE, sampler=train_sampler)
+    test_loader = DataLoader(dataset, batch_size=BATCH_SIZE, sampler=test_sampler)
+
+    return (train_loader, test_loader)

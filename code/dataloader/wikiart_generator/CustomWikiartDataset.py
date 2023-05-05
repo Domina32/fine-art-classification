@@ -10,6 +10,8 @@ import pandas as pd
 import torch
 import torchvision
 
+# from torchvision.transforms import functional as fn
+
 local_FILE_LENGTH_MAP_JSON_PATH = Path(__file__).parent
 
 
@@ -73,16 +75,16 @@ class CustomWikiartDataset(CustomDataset):
             for file_name in map_dict:
                 for chunk in pd.read_csv(f"{self.data_path}/csv/" + file_name, chunksize=self.chunk_size):
                     image_arrays, labels = [], []
-                    image_arrays = (
+                    image_arrays = torch.tensor(
                         chunk["image"]
-                        # .map(lambda img: resize_img(tf.io.decode_image(ast.literal_eval(img).get("bytes")).numpy()))
                         .map(
                             lambda img: resize_img(
                                 torchvision.io.decode_image(
                                     torch.tensor(np.frombuffer(ast.literal_eval(img).get("bytes"), dtype=np.uint8))
                                 )
                             )
-                        ).values
+                        )
+                        .values
                     )
                     labels = chunk[self.chosen_label].values  # .decode('utf-8')
 
