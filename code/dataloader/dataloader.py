@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from typing import Optional
 
 import numpy as np
 from torch.utils.data import DataLoader, Dataset, SubsetRandomSampler
@@ -40,9 +41,16 @@ RANDOM_SEED = 32
 
 
 def split_dataset(
-    dataset: CustomDataset, test_split=TEST_SPLIT, batch_size=BATCH_SIZE, shuffle=SHUFFLE, random_seed=RANDOM_SEED
+    dataset: CustomDataset,
+    test_split=TEST_SPLIT,
+    batch_size=BATCH_SIZE,
+    shuffle=SHUFFLE,
+    random_seed=RANDOM_SEED,
+    num_workers=0,
+    prefetch_factor: Optional[int] = None,
+    pin_memory: bool = False,
 ):
-    dataset_size = dataset.length
+    dataset_size = len(dataset)
     indices = list(range(dataset_size))
     split = int(np.floor(TEST_SPLIT * dataset_size))
     if SHUFFLE:
@@ -53,7 +61,21 @@ def split_dataset(
     train_sampler = SubsetRandomSampler(train_indices)
     test_sampler = SubsetRandomSampler(test_indices)
 
-    train_loader = DataLoader(dataset, batch_size=BATCH_SIZE, sampler=train_sampler)
-    test_loader = DataLoader(dataset, batch_size=BATCH_SIZE, sampler=test_sampler)
+    train_loader = DataLoader(
+        dataset,
+        batch_size=BATCH_SIZE,
+        sampler=train_sampler,
+        num_workers=num_workers,
+        prefetch_factor=prefetch_factor,
+        pin_memory=pin_memory,
+    )
+    test_loader = DataLoader(
+        dataset,
+        batch_size=BATCH_SIZE,
+        sampler=test_sampler,
+        num_workers=num_workers,
+        prefetch_factor=prefetch_factor,
+        pin_memory=pin_memory,
+    )
 
     return (train_loader, test_loader)
