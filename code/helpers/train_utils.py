@@ -11,7 +11,6 @@ from torch.optim import Adam
 from torch.utils.data import DataLoader
 
 NUM_EPOCHS = 5
-BATCH_SIZE = 16
 LEARNING_RATE = 0.001
 
 

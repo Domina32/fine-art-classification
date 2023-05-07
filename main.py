@@ -11,7 +11,7 @@ device = Device().get_device()
 
 def main():
     training_loader, testing_loader = get_dataloader(
-        "wikiart", use_huggingface=True, num_workers=12, prefetch_factor=2, pin_memory=True, batch_size=BATCH_SIZE
+        "wga", num_workers=12, prefetch_factor=2, pin_memory=True, batch_size=BATCH_SIZE, slice=(0, 1500)
     )
 
     trainer, logger = get_trainer(device, training_loader, testing_loader, overwrite_checkpoints=True)

@@ -20,12 +20,12 @@ def get_dataloader(
     num_workers=0,
     prefetch_factor: Optional[int] = None,
     pin_memory: bool = False,
-    use_huggingface=False,
+    slice: Optional[Union[tuple[int, int], tuple[int, int, int]]] = None,
 ) -> tuple[DataLoader[tuple[Union[NDArray[uint8], Tensor]]], DataLoader[tuple[NDArray[uint8]]]]:
     if data == "wga":
-        dataset = CustomWgaDataset(chunk_size=1)
+        dataset = CustomWgaDataset(chunk_size=1) if not slice else CustomWgaDataset(chunk_size=1).slice(*slice)
     elif data == "wikiart":
-        dataset = CustomWikiartDataset(use_huggingface=use_huggingface)
+        dataset = CustomWikiartDataset() if not slice else CustomWikiartDataset().slice(*slice)
     else:
         raise ValueError(f"Unknown argument {data}")
 

@@ -1,6 +1,7 @@
 from code.dataloader.dataloader import CustomDataset
 from code.helpers.image_utils import resize_img
 from pathlib import Path
+from typing import Optional
 
 from datasets import DatasetDict, load_dataset
 from torchvision.transforms import functional as fn
@@ -11,55 +12,50 @@ local_FILE_LENGTH_MAP_JSON_PATH = Path(__file__).parent
 class CustomWikiartDataset(CustomDataset):
     def __init__(
         self,
-        use_huggingface=False,
-        wikiart_data_path="wikiart",
-        file_length_map_json_path=local_FILE_LENGTH_MAP_JSON_PATH,
         chosen_label="genre",
         chunk_size=1,
     ):
         super().__init__(chosen_label=chosen_label, chunk_size=chunk_size)
 
-        self.use_huggingface = False
-
-        if use_huggingface:
-            self.use_huggingface = True
-            dataset = load_dataset("huggan/wikiart", cache_dir="./data/wikiart/")
-            if isinstance(dataset, DatasetDict):
-                dataset = dataset["train"]
-                column_names_to_remove = [
-                    column_name
-                    for column_name in dataset.column_names
-                    if column_name != chosen_label and column_name != "image"
-                ]
-                dataset = dataset.remove_columns(column_names_to_remove)
-                self.__dataset = dataset.with_format("torch")
-                self.length = len(self.__dataset)
-            else:
-                raise ValueError(f"Wrong type of dataset. Expected {DatasetDict}, got {type(dataset)}")
+        dataset = load_dataset("huggan/wikiart", cache_dir="./data/wikiart/")
+        if isinstance(dataset, DatasetDict):
+            dataset = dataset["train"]
+            column_names_to_remove = [
+                column_name
+                for column_name in dataset.column_names
+                if column_name != chosen_label and column_name != "image"
+            ]
+            dataset = dataset.remove_columns(column_names_to_remove)
+            self.__dataset = dataset.with_format("torch")
+        else:
+            raise ValueError(f"Wrong type of dataset. Expected {DatasetDict}, got {type(dataset)}")
 
     def __len__(self):
-        return self.length
+        return len(self.__dataset)
 
-    def __getitem__(self, raw_row_id):
-        if self.use_huggingface:
-            image = self.__dataset[raw_row_id]["image"]
+    def __getitem__(self, key):
+        image = self.__dataset[key]["image"]
 
-            return (
-                fn.convert_image_dtype(resize_img(image.permute(2, 0, 1))),
-                self.__dataset[raw_row_id][self.chosen_label].item(),
-            )
+        return (
+            fn.convert_image_dtype(resize_img(image.permute(2, 0, 1))),
+            self.__dataset[key][self.chosen_label].item(),
+        )
 
     def __iter__(self):
         return self.generator()
 
     def generator(self):
-        if self.use_huggingface:
-            for item in self.__dataset:
-                if isinstance(item, dict):
-                    image = item["image"]
-                    yield (fn.convert_image_dtype(resize_img(image.permute(2, 0, 1))), item[self.chosen_label].item())
-                else:
-                    raise ValueError(f"Expected item in dataset to have type {dict}, found {type(item)}")
+        for item in self.__dataset:
+            if isinstance(item, dict):
+                image = item["image"]
+                yield (fn.convert_image_dtype(resize_img(image.permute(2, 0, 1))), item[self.chosen_label].item())
+            else:
+                raise ValueError(f"Expected item in dataset to have type {dict}, found {type(item)}")
+
+    def slice(self, start: int = 0, stop: Optional[int] = None, step: int = 1):
+        self.__dataset = self.__dataset.select(range(start, stop or self.__length, step))
+
+        return self
 
 
 # import ast
