@@ -19,7 +19,7 @@ class Device:
         elif HAS_DIRECTML and torch_directml.is_available():
             self.__device = torch_directml.device()
         elif torch.cuda.is_available():
-            self.__device = "torch.cuda"
+            self.__device = "cuda"
         else:
             try:
                 if torch.backends.mps.is_available():

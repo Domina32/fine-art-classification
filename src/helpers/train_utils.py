@@ -75,7 +75,7 @@ def get_logger(train_evaluator: Engine, test_evaluator: Engine, trainer: Engine)
 
 
 def get_trainer(
-    network: Optional[Union[Literal["resnet"], Literal["densenet"]]],
+    network: Optional[Union[Literal["resnet"], Literal["densenet"], Literal["iresnet"]]],
     device: device,
     train_loader: DataLoader,
     test_loader: DataLoader,
@@ -84,6 +84,10 @@ def get_trainer(
     overwrite_checkpoints=False,
 ) -> tuple[Engine, TensorboardLogger]:
     model = Net(network=network, num_classes=num_classes).freeze().to(device)
+
+    if network == "iresnet":
+        model.init_actnorm(train_loader)
+
     optimizer = Adam(model.parameters(), lr=learning_rate)
     loss_function = CrossEntropyLoss()
     trainer = create_supervised_trainer(model, optimizer, loss_function, device)

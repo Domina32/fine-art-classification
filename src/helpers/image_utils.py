@@ -4,7 +4,7 @@ import torchvision
 import torchvision.transforms.functional as fn
 from skimage import io
 
-############ COMMON
+# COMMON
 
 
 # def resize_img(img, new_width=300, new_height=300):
@@ -30,7 +30,7 @@ def change_channels(img):
     return cv2.cvtColor(img, cv2.COLOR_BGR2RGBA)
 
 
-############ WGA
+# WGA
 
 
 def label_mapping(label):
@@ -81,6 +81,3 @@ def url_to_numpy(url):
 
     except Exception:
         pass
-
-
-############ WIKIART

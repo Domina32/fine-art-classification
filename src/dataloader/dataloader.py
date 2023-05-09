@@ -41,6 +41,7 @@ def split_dataset(
     """
     Split dataset into two non-intersecting parts.
     """
+
     dataset_size = len(dataset)
     indices = list(range(dataset_size))
     split = int(np.floor(test_split * dataset_size))
@@ -60,6 +61,7 @@ def split_dataset(
         num_workers=num_workers,
         prefetch_factor=prefetch_factor,
         pin_memory=pin_memory,
+        drop_last=True,
     )
     test_loader = DataLoader(
         dataset,
@@ -68,6 +70,7 @@ def split_dataset(
         num_workers=num_workers,
         prefetch_factor=prefetch_factor,
         pin_memory=pin_memory,
+        drop_last=True,
     )
 
     return (train_loader, test_loader)

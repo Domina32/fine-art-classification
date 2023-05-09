@@ -39,7 +39,9 @@ class CustomWgaDataset(CustomDataset):
         return self.__length
 
     def __getitem__(self, key):
-        return (fn.to_tensor(self.__data["images"][key]), self.__data["labels"][key])
+        # return (fn.to_tensor(self.__data["images"][key]), self.__data["labels"][key])
+        return (fn.to_tensor(self.__data["images"][key]), torch.tensor(self.__data["labels"][key]))
+        # return torch.nested.nested_tensor([fn.to_tensor(self.__data["images"][key]), self.__data["labels"][key]])
 
     def __iter__(self):
         return self.generator()
@@ -57,9 +59,13 @@ class CustomWgaDataset(CustomDataset):
 
             if self.chunk_size == 1:
                 for row in range(self.chunk_size):
-                    yield (torch.tensor(image_arrays[row]), labels[row])
+                    # yield (torch.tensor(image_arrays[row]), labels[row])
+                    yield (torch.tensor(image_arrays[row]), torch.tensor(labels[row]))
+                    # yield torch.nested.nested_tensor([torch.tensor(image_arrays[row]), labels[row]])
 
-            yield (image_arrays, np.asarray(labels))
+            # yield (image_arrays, np.asarray(labels))
+            yield (image_arrays, torch.tensor(labels))
+            # yield torch.nested.nested_tensor([image_arrays, labels])
 
     def slice(self, start: int = 0, stop: Optional[int] = None, step: int = 1):
         self.__data["images"] = self.__data["images"][start:stop:step]
