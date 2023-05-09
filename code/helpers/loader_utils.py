@@ -1,7 +1,7 @@
 from code.dataloader.dataloader import split_dataset
 from code.dataloader.wga_generator.CustomWgaDataset import CustomWgaDataset
 from code.dataloader.wikiart_generator.CustomWikiartDataset import CustomWikiartDataset
-from typing import Optional, Union
+from typing import Optional, Union, Literal
 
 import matplotlib.pyplot as plt
 from numpy import uint8
@@ -9,14 +9,15 @@ from numpy.typing import NDArray
 from torch import Tensor
 from torch.utils.data import DataLoader
 
-BATCH_SIZE = 16
-
 
 def get_dataloader(
-    data="wga",
+    data: Union[Literal["wga"], Literal["wikiart"]],
+    test_split,
+    batch_size,
+    shuffle,
+    random_seed,
     check=False,
     image_save_name="./example.png",
-    batch_size=BATCH_SIZE,
     num_workers=0,
     prefetch_factor: Optional[int] = None,
     pin_memory: bool = False,
@@ -41,7 +42,10 @@ def get_dataloader(
 
     train_loader, test_loader = split_dataset(
         dataset,
+        test_split,
         batch_size,
+        shuffle,
+        random_seed,
         num_workers=num_workers,
         prefetch_factor=prefetch_factor,
         pin_memory=pin_memory,
