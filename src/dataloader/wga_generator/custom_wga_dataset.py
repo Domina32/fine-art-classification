@@ -1,11 +1,12 @@
 import os
-from code.dataloader.dataloader import CustomDataset
 from pathlib import Path, PurePath
 from typing import Literal, Optional
 
 import numpy as np
 import torch
 from torchvision.transforms import functional as fn
+
+from ..dataloader import CustomDataset
 
 DATA_PATH = "wga"
 current_dir = Path(__file__).parent.parent
@@ -22,21 +23,15 @@ class CustomWgaDataset(CustomDataset):
 
         self.__data_path = PurePath(local_DATA_PATH, DATA_PATH)
         self.__data: dict[Literal["images", "labels"], np.ndarray] = {
-            "images": np.load(
-                os.path.join(self.__data_path, "wga_images.npy"), mmap_mode="r"
-            ),
-            "labels": np.load(
-                os.path.join(self.__data_path, "wga_labels.npy"), mmap_mode="r"
-            ),
+            "images": np.load(os.path.join(self.__data_path, "wga_images.npy"), mmap_mode="r"),
+            "labels": np.load(os.path.join(self.__data_path, "wga_labels.npy"), mmap_mode="r"),
         }
 
         labels_length = len(self.__data["labels"])
         images_length = len(self.__data["images"])
 
         if labels_length != images_length:
-            raise ValueError(
-                f"Length of labels ({labels_length}) and images ({images_length}) is mismatched"
-            )
+            raise ValueError(f"Length of labels ({labels_length}) and images ({images_length}) is mismatched")
 
         self.__length = labels_length
 
@@ -54,9 +49,7 @@ class CustomWgaDataset(CustomDataset):
             slice_end = np.min((slice_start + self.chunk_size, self.__length))
             image_arrays = np.empty((self.chunk_size, *self.in_shape), dtype=np.uint8)
 
-            for index, image_array in enumerate(
-                self.__data["images"][slice_start:slice_end]
-            ):
+            for index, image_array in enumerate(self.__data["images"][slice_start:slice_end]):
                 tensor = fn.to_tensor(image_array)
                 image_arrays[index] = tensor
 
@@ -76,9 +69,7 @@ class CustomWgaDataset(CustomDataset):
         images_length = len(self.__data["images"])
 
         if labels_length != images_length:
-            raise ValueError(
-                f"New length of labels ({labels_length}) and images ({images_length}) is mismatched"
-            )
+            raise ValueError(f"New length of labels ({labels_length}) and images ({images_length}) is mismatched")
 
         self.__length = labels_length
 

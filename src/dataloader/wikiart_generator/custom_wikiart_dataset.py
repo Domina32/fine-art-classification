@@ -1,10 +1,11 @@
-from code.dataloader.dataloader import CustomDataset
-from code.helpers.image_utils import resize_img
 from pathlib import Path
 from typing import Optional
 
 from datasets import DatasetDict, load_dataset
 from torchvision.transforms import functional as fn
+
+from ...helpers.image_utils import resize_img
+from ..dataloader import CustomDataset
 
 local_FILE_LENGTH_MAP_JSON_PATH = Path(__file__).parent
 
@@ -28,9 +29,7 @@ class CustomWikiartDataset(CustomDataset):
             dataset = dataset.remove_columns(column_names_to_remove)
             self.__dataset = dataset.with_format("torch")
         else:
-            raise ValueError(
-                f"Wrong type of dataset. Expected {DatasetDict}, got {type(dataset)}"
-            )
+            raise ValueError(f"Wrong type of dataset. Expected {DatasetDict}, got {type(dataset)}")
 
     def __len__(self):
         return len(self.__dataset)
@@ -55,14 +54,10 @@ class CustomWikiartDataset(CustomDataset):
                     item[self.chosen_label].item(),
                 )
             else:
-                raise ValueError(
-                    f"Expected item in dataset to have type {dict}, found {type(item)}"
-                )
+                raise ValueError(f"Expected item in dataset to have type {dict}, found {type(item)}")
 
     def slice(self, start: int = 0, stop: Optional[int] = None, step: int = 1):
-        self.__dataset = self.__dataset.select(
-            range(start, stop or self.__length, step)
-        )
+        self.__dataset = self.__dataset.select(range(start, stop or self.__length, step))
 
         return self
 

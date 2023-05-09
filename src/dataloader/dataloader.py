@@ -1,6 +1,7 @@
 from typing import Optional
 
 import numpy as np
+import numpy.random
 from torch.utils.data import DataLoader, Dataset, SubsetRandomSampler
 
 DEFAULT_IN_SHAPE = (3, 300, 300)
@@ -29,9 +30,9 @@ class CustomDataset(Dataset):
 
 def split_dataset(
     dataset: CustomDataset,
-    test_split,
-    batch_size,
-    shuffle,
+    test_split: int,
+    batch_size: int,
+    shuffle: bool,
     random_seed,
     num_workers=0,
     prefetch_factor: Optional[int] = None,
@@ -44,8 +45,9 @@ def split_dataset(
     indices = list(range(dataset_size))
     split = int(np.floor(test_split * dataset_size))
     if shuffle:
-        np.random.seed(random_seed)
-        np.random.shuffle(indices)
+        random = numpy.random.default_rng(random_seed)
+        random.shuffle(indices)
+
     train_indices, test_indices = indices[split:], indices[:split]
 
     train_sampler = SubsetRandomSampler(train_indices)
@@ -81,4 +83,4 @@ def preprocess_dataset():
     The images have to be loaded in to a range of [0, 1] and then normalized
     using mean = [0.485, 0.456, 0.406] and std = [0.229, 0.224, 0.225]."
     """
-    pass
+    return

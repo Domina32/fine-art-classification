@@ -1,6 +1,6 @@
 """This module defines project-level constants."""
 
-################## train related ##################
+# train related
 
 # NUM_EPOCHS = 10
 # LEARNING_RATE = 0.001
@@ -10,12 +10,12 @@
 # PREFETCH_FACTOR = 2
 # PIN_MEMORY = True
 
-################## data related ##################
+# data related
 
 DEFAULT_IN_SHAPE = (3, 300, 300)
 TEST_SPLIT = 0.1
 SHUFFLE = True
 
-################## common ##################
+# common
 
 RANDOM_SEED = 32

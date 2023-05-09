@@ -1,13 +1,14 @@
-from code.dataloader.dataloader import split_dataset
-from code.dataloader.wga_generator.CustomWgaDataset import CustomWgaDataset
-from code.dataloader.wikiart_generator.CustomWikiartDataset import CustomWikiartDataset
-from typing import Optional, Union, Literal
+from typing import Literal, Optional, Union
 
 import matplotlib.pyplot as plt
 from numpy import uint8
 from numpy.typing import NDArray
 from torch import Tensor
 from torch.utils.data import DataLoader
+
+from ..dataloader.dataloader import split_dataset
+from ..dataloader.wga_generator.custom_wga_dataset import CustomWgaDataset
+from ..dataloader.wikiart_generator.custom_wikiart_dataset import CustomWikiartDataset
 
 
 def get_dataloader(
@@ -22,21 +23,11 @@ def get_dataloader(
     prefetch_factor: Optional[int] = None,
     pin_memory: bool = False,
     slice: Optional[Union[tuple[int, int], tuple[int, int, int]]] = None,
-) -> tuple[
-    DataLoader[tuple[Union[NDArray[uint8], Tensor]]], DataLoader[tuple[NDArray[uint8]]]
-]:
+) -> tuple[DataLoader[tuple[Union[NDArray[uint8], Tensor]]], DataLoader[tuple[NDArray[uint8]]]]:
     if data == "wga":
-        dataset = (
-            CustomWgaDataset(chunk_size=1)
-            if not slice
-            else CustomWgaDataset(chunk_size=1).slice(*slice)
-        )
+        dataset = CustomWgaDataset(chunk_size=1) if not slice else CustomWgaDataset(chunk_size=1).slice(*slice)
     elif data == "wikiart":
-        dataset = (
-            CustomWikiartDataset()
-            if not slice
-            else CustomWikiartDataset().slice(*slice)
-        )
+        dataset = CustomWikiartDataset() if not slice else CustomWikiartDataset().slice(*slice)
     else:
         raise ValueError(f"Unknown argument {data}")
 

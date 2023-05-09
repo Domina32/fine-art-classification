@@ -60,9 +60,7 @@ def label_mapping(label):
 
 def transform_URL(URL):
     """Transform URL from old format to new format in order to access jpg."""
-    return "https://www.wga.hu/art/" + "/".join(
-        URL.split("/")[-3:-1] + [URL.split("/")[-1].split(".")[0] + ".jpg"]
-    )
+    return "https://www.wga.hu/art/" + "/".join(URL.split("/")[-3:-1] + [URL.split("/")[-1].split(".")[0] + ".jpg"])
 
 
 def load_img(URL):
