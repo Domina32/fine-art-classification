@@ -28,7 +28,9 @@ class CustomWikiartDataset(CustomDataset):
             dataset = dataset.remove_columns(column_names_to_remove)
             self.__dataset = dataset.with_format("torch")
         else:
-            raise ValueError(f"Wrong type of dataset. Expected {DatasetDict}, got {type(dataset)}")
+            raise ValueError(
+                f"Wrong type of dataset. Expected {DatasetDict}, got {type(dataset)}"
+            )
 
     def __len__(self):
         return len(self.__dataset)
@@ -48,12 +50,19 @@ class CustomWikiartDataset(CustomDataset):
         for item in self.__dataset:
             if isinstance(item, dict):
                 image = item["image"]
-                yield (fn.convert_image_dtype(resize_img(image.permute(2, 0, 1))), item[self.chosen_label].item())
+                yield (
+                    fn.convert_image_dtype(resize_img(image.permute(2, 0, 1))),
+                    item[self.chosen_label].item(),
+                )
             else:
-                raise ValueError(f"Expected item in dataset to have type {dict}, found {type(item)}")
+                raise ValueError(
+                    f"Expected item in dataset to have type {dict}, found {type(item)}"
+                )
 
     def slice(self, start: int = 0, stop: Optional[int] = None, step: int = 1):
-        self.__dataset = self.__dataset.select(range(start, stop or self.__length, step))
+        self.__dataset = self.__dataset.select(
+            range(start, stop or self.__length, step)
+        )
 
         return self
 

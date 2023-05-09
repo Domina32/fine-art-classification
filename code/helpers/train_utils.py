@@ -2,7 +2,12 @@ from code.models.model import Net
 from typing import Literal, Optional, Union
 
 from ignite.contrib.handlers.tensorboard_logger import TensorboardLogger
-from ignite.engine import Engine, Events, create_supervised_evaluator, create_supervised_trainer
+from ignite.engine import (
+    Engine,
+    Events,
+    create_supervised_evaluator,
+    create_supervised_trainer,
+)
 from ignite.handlers import ModelCheckpoint, global_step_from_engine
 from ignite.metrics import Accuracy, Loss
 from torch import device
@@ -19,7 +24,10 @@ def score_function(engine):
     return engine.state.metrics["accuracy"]
 
 
-def log_progress(engine: Engine, engine_type: Optional[Union[Literal["Training"], Literal["Validation"]]]):
+def log_progress(
+    engine: Engine,
+    engine_type: Optional[Union[Literal["Training"], Literal["Validation"]]],
+):
     if engine_type == "Training":
         output = engine.state.output
         print(
@@ -27,7 +35,11 @@ def log_progress(engine: Engine, engine_type: Optional[Union[Literal["Training"]
             end="\r",
         )
     else:
-        output = f"Avg accuracy: {engine.state.metrics['accuracy']:.2f}" if "accuracy" in engine.state.metrics else ""
+        output = (
+            f"Avg accuracy: {engine.state.metrics['accuracy']:.2f}"
+            if "accuracy" in engine.state.metrics
+            else ""
+        )
         print(
             f"{engine_type} - Epoch[{engine.state.epoch}], Iter[{engine.state.iteration}] {output}",
             end="\r",
@@ -59,7 +71,10 @@ def get_logger(train_evaluator: Engine, test_evaluator: Engine, trainer: Engine)
     )
 
     # Attach handler for plotting both evaluators' metrics after every epoch completes
-    for tag, evaluator in [("training", train_evaluator), ("validation", test_evaluator)]:
+    for tag, evaluator in [
+        ("training", train_evaluator),
+        ("validation", test_evaluator),
+    ]:
         tb_logger.attach_output_handler(
             evaluator,
             event_name=Events.EPOCH_COMPLETED,
@@ -86,7 +101,9 @@ def get_trainer(
         "accuracy": Accuracy(),
         "loss": Loss(loss_function),
     }
-    training_evaluator = create_supervised_evaluator(model, metrics=metrics, device=device)
+    training_evaluator = create_supervised_evaluator(
+        model, metrics=metrics, device=device
+    )
     test_evaluator = create_supervised_evaluator(model, metrics=metrics, device=device)
 
     trainer.add_event_handler(Events.ITERATION_COMPLETED, log_progress, "Training")
@@ -99,10 +116,17 @@ def get_trainer(
     )
 
     trainer.add_event_handler(
-        Events.EPOCH_COMPLETED, log_results, test_evaluator, test_loader, evaluator_type="Validation"
+        Events.EPOCH_COMPLETED,
+        log_results,
+        test_evaluator,
+        test_loader,
+        evaluator_type="Validation",
     )
 
-    for evaluator, name in (training_evaluator, "Train evaluator"), (test_evaluator, "Val evaluator"):
+    for evaluator, name in (training_evaluator, "Train evaluator"), (
+        test_evaluator,
+        "Val evaluator",
+    ):
         evaluator.add_event_handler(Events.ITERATION_COMPLETED, log_progress, name)
         pass
 
@@ -113,13 +137,21 @@ def get_trainer(
         filename_prefix="best",
         score_function=score_function,
         score_name="accuracy",
-        global_step_transform=global_step_from_engine(trainer),  # helps fetch the trainer's state
+        global_step_transform=global_step_from_engine(
+            trainer
+        ),  # helps fetch the trainer's state
         require_empty=not overwrite_checkpoints,
     )
 
     # Save the model after every epoch of test_evaluator is completed
-    test_evaluator.add_event_handler(Events.COMPLETED, model_checkpoint, {"model": model})
+    test_evaluator.add_event_handler(
+        Events.COMPLETED, model_checkpoint, {"model": model}
+    )
 
-    logger = get_logger(train_evaluator=training_evaluator, test_evaluator=test_evaluator, trainer=trainer)
+    logger = get_logger(
+        train_evaluator=training_evaluator,
+        test_evaluator=test_evaluator,
+        trainer=trainer,
+    )
 
     return trainer, logger

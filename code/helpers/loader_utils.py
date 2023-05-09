@@ -21,16 +21,30 @@ def get_dataloader(
     prefetch_factor: Optional[int] = None,
     pin_memory: bool = False,
     slice: Optional[Union[tuple[int, int], tuple[int, int, int]]] = None,
-) -> tuple[DataLoader[tuple[Union[NDArray[uint8], Tensor]]], DataLoader[tuple[NDArray[uint8]]]]:
+) -> tuple[
+    DataLoader[tuple[Union[NDArray[uint8], Tensor]]], DataLoader[tuple[NDArray[uint8]]]
+]:
     if data == "wga":
-        dataset = CustomWgaDataset(chunk_size=1) if not slice else CustomWgaDataset(chunk_size=1).slice(*slice)
+        dataset = (
+            CustomWgaDataset(chunk_size=1)
+            if not slice
+            else CustomWgaDataset(chunk_size=1).slice(*slice)
+        )
     elif data == "wikiart":
-        dataset = CustomWikiartDataset() if not slice else CustomWikiartDataset().slice(*slice)
+        dataset = (
+            CustomWikiartDataset()
+            if not slice
+            else CustomWikiartDataset().slice(*slice)
+        )
     else:
         raise ValueError(f"Unknown argument {data}")
 
     train_loader, test_loader = split_dataset(
-        dataset, batch_size, num_workers=num_workers, prefetch_factor=prefetch_factor, pin_memory=pin_memory
+        dataset,
+        batch_size,
+        num_workers=num_workers,
+        prefetch_factor=prefetch_factor,
+        pin_memory=pin_memory,
     )
 
     if check:

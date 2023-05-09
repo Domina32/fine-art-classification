@@ -3,10 +3,12 @@ from torch import cuda, device
 
 try:
     import torch_directml
+
     has_directml = True
 except ImportError:
     has_directml = False
     print("Couldn't import directml... Ignoring...")
+
 
 class Device:
     def __init__(self, preferred: Union[Literal["cpu"], Literal["gpu"]] = "gpu"):

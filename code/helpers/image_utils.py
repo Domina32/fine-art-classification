@@ -17,7 +17,12 @@ def resize_img(img, new_width=300, new_height=300):
     """Resize an image using new  width and height"""
     new_points = [new_width, new_height]
 
-    return fn.resize(img, new_points, torchvision.transforms.InterpolationMode.BILINEAR, antialias=True)
+    return fn.resize(
+        img,
+        new_points,
+        torchvision.transforms.InterpolationMode.BILINEAR,
+        antialias=True,
+    )
 
 
 def change_channels(img):
@@ -55,7 +60,9 @@ def label_mapping(label):
 
 def transform_URL(URL):
     """Transform URL from old format to new format in order to access jpg."""
-    return "https://www.wga.hu/art/" + "/".join(URL.split("/")[-3:-1] + [URL.split("/")[-1].split(".")[0] + ".jpg"])
+    return "https://www.wga.hu/art/" + "/".join(
+        URL.split("/")[-3:-1] + [URL.split("/")[-1].split(".")[0] + ".jpg"]
+    )
 
 
 def load_img(URL):

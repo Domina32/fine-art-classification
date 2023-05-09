@@ -11,10 +11,16 @@ device = Device().get_device()
 
 def main():
     training_loader, testing_loader = get_dataloader(
-        "wikiart", num_workers=12, prefetch_factor=2, pin_memory=True, batch_size=BATCH_SIZE
+        "wikiart",
+        num_workers=12,
+        prefetch_factor=2,
+        pin_memory=True,
+        batch_size=BATCH_SIZE,
     )
 
-    trainer, logger = get_trainer(device, training_loader, testing_loader, overwrite_checkpoints=True)
+    trainer, logger = get_trainer(
+        device, training_loader, testing_loader, overwrite_checkpoints=True
+    )
     trainer.run(training_loader, max_epochs=NUM_EPOCHS)
 
     logger.close()
