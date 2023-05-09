@@ -2,9 +2,13 @@
 
 ################## train related ##################
 
-NUM_EPOCHS = 10
-LEARNING_RATE = 0.001
-BATCH_SIZE = 16
+# NUM_EPOCHS = 10
+# LEARNING_RATE = 0.001
+# BATCH_SIZE = 16
+
+# NUM_WORKERS = 12
+# PREFETCH_FACTOR = 2
+# PIN_MEMORY = True
 
 ################## data related ##################
 

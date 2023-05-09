@@ -15,11 +15,7 @@ from torch.nn import CrossEntropyLoss
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 
-NUM_EPOCHS = 5
-LEARNING_RATE = 0.001
 
-
-# Score function to return current value of any metric we defined above in val_metrics
 def score_function(engine):
     return engine.state.metrics["accuracy"]
 
@@ -87,13 +83,14 @@ def get_logger(train_evaluator: Engine, test_evaluator: Engine, trainer: Engine)
 
 
 def get_trainer(
+    network: Optional[Union[Literal["resnet"], Literal["densenet"]]],
     device: device,
     train_loader: DataLoader,
     test_loader: DataLoader,
-    learning_rate=LEARNING_RATE,
+    learning_rate,
     overwrite_checkpoints=False,
 ) -> tuple[Engine, TensorboardLogger]:
-    model = Net().freeze().to(device)
+    model = Net(network=network).freeze().to(device)
     optimizer = Adam(model.parameters(), lr=learning_rate)
     loss_function = CrossEntropyLoss()
     trainer = create_supervised_trainer(model, optimizer, loss_function, device)

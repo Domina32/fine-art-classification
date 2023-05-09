@@ -37,9 +37,9 @@ def split_dataset(
     prefetch_factor: Optional[int] = None,
     pin_memory: bool = False,
 ):
-"""
-Split dataset into two non-intersecting parts.
-"""
+    """
+    Split dataset into two non-intersecting parts.
+    """
     dataset_size = len(dataset)
     indices = list(range(dataset_size))
     split = int(np.floor(test_split * dataset_size))
