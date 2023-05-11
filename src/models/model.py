@@ -14,8 +14,8 @@ import src.constants
 
 from .IResnet.conv_iResNet import conv_iResNet as iResNet
 
-from lib.resflow import ResidualFlow
-import lib.layers as layers
+from .IDensenet.resflow import ResidualFlow
+import IDensenet.layers as layers
 
 
 class Net(nn.Module):
