@@ -10,6 +10,10 @@
 # PREFETCH_FACTOR = 2
 # PIN_MEMORY = True
 
+# network related
+
+IDENSENET_TASK = "classification"
+
 # data related
 
 DEFAULT_IN_SHAPE = (3, 300, 300)

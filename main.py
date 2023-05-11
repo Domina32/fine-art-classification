@@ -17,14 +17,14 @@ NUM_EPOCHS = 2
 LEARNING_RATE = 0.001
 BATCH_SIZE = 16
 
-NUM_WORKERS = 12
+NUM_WORKERS = 0  # 12
 PREFETCH_FACTOR = 2
 PIN_MEMORY = True
 
 
 def main():
     DATASET = "wga"
-    NETWORK = "resnet"
+    NETWORK = "idensenet"
 
     training_loader, testing_loader = get_dataloader(
         DATASET,
@@ -37,7 +37,9 @@ def main():
         pin_memory=PIN_MEMORY,
     )
 
-    training_loader = DataLoader(CIFAR10(root="./data", transform=ToTensor()), batch_size=BATCH_SIZE)
+    training_loader = DataLoader(
+        CIFAR10(root="./data", transform=ToTensor()), batch_size=BATCH_SIZE
+    )
 
     trainer, logger = get_trainer(
         NETWORK,

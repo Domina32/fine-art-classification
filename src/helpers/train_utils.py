@@ -1,7 +1,12 @@
 from typing import Literal, Optional, Union
 
 from ignite.contrib.handlers.tensorboard_logger import TensorboardLogger
-from ignite.engine import Engine, Events, create_supervised_evaluator, create_supervised_trainer
+from ignite.engine import (
+    Engine,
+    Events,
+    create_supervised_evaluator,
+    create_supervised_trainer,
+)
 from ignite.handlers import ModelCheckpoint, global_step_from_engine
 from ignite.metrics import Accuracy, Loss
 from torch import device
@@ -27,7 +32,11 @@ def log_progress(
             end="\r",
         )
     else:
-        output = f"Avg accuracy: {engine.state.metrics['accuracy']:.2f}" if "accuracy" in engine.state.metrics else ""
+        output = (
+            f"Avg accuracy: {engine.state.metrics['accuracy']:.2f}"
+            if "accuracy" in engine.state.metrics
+            else ""
+        )
         print(
             f"{engine_type} - Epoch[{engine.state.epoch}], Iter[{engine.state.iteration}] {output}",
             end="\r",
@@ -75,7 +84,14 @@ def get_logger(train_evaluator: Engine, test_evaluator: Engine, trainer: Engine)
 
 
 def get_trainer(
-    network: Optional[Union[Literal["resnet"], Literal["densenet"], Literal["iresnet"]]],
+    network: Optional[
+        Union[
+            Literal["resnet"],
+            Literal["densenet"],
+            Literal["iresnet"],
+            Literal["idensenet"],
+        ]
+    ],
     device: device,
     train_loader: DataLoader,
     test_loader: DataLoader,
@@ -95,7 +111,9 @@ def get_trainer(
         "accuracy": Accuracy(),
         "loss": Loss(loss_function),
     }
-    training_evaluator = create_supervised_evaluator(model, metrics=metrics, device=device)
+    training_evaluator = create_supervised_evaluator(
+        model, metrics=metrics, device=device
+    )
     test_evaluator = create_supervised_evaluator(model, metrics=metrics, device=device)
 
     trainer.add_event_handler(Events.ITERATION_COMPLETED, log_progress, "Training")
@@ -128,12 +146,16 @@ def get_trainer(
         filename_prefix="best",
         score_function=score_function,
         score_name="accuracy",
-        global_step_transform=global_step_from_engine(trainer),  # helps fetch the trainer's state
+        global_step_transform=global_step_from_engine(
+            trainer
+        ),  # helps fetch the trainer's state
         require_empty=not overwrite_checkpoints,
     )
 
     # Save the model after every epoch of test_evaluator is completed
-    test_evaluator.add_event_handler(Events.COMPLETED, model_checkpoint, {"model": model})
+    test_evaluator.add_event_handler(
+        Events.COMPLETED, model_checkpoint, {"model": model}
+    )
 
     logger = get_logger(
         train_evaluator=training_evaluator,
