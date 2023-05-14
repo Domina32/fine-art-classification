@@ -1,8 +1,9 @@
-import warnings
+import os
+import sys
 
-from torch.utils.data import DataLoader
-from torchvision.datasets import CIFAR10
-from torchvision.transforms import ToTensor
+sys.path.append(os.path.abspath(os.path.join(".", "src", "models", "IDensenet")))
+
+import warnings
 
 import src.constants
 from src.helpers.device_utils import Device
@@ -17,13 +18,13 @@ NUM_EPOCHS = 2
 LEARNING_RATE = 0.001
 BATCH_SIZE = 16
 
-NUM_WORKERS = 0  # 12
-PREFETCH_FACTOR = 2
+NUM_WORKERS = 2  # 12
+PREFETCH_FACTOR = 2  # Must be 0 if NUM_WORKERS is also 0
 PIN_MEMORY = True
 
 
 def main():
-    DATASET = "wga"
+    DATASET = "wikiart"
     NETWORK = "idensenet"
 
     training_loader, testing_loader = get_dataloader(
@@ -35,10 +36,6 @@ def main():
         num_workers=NUM_WORKERS,
         prefetch_factor=PREFETCH_FACTOR,
         pin_memory=PIN_MEMORY,
-    )
-
-    training_loader = DataLoader(
-        CIFAR10(root="./data", transform=ToTensor()), batch_size=BATCH_SIZE
     )
 
     trainer, logger = get_trainer(

@@ -3,19 +3,13 @@ from typing import Literal, Optional, Union
 import torch
 import torch.utils.data
 from torch import nn
-from torchvision.models import (
-    DenseNet121_Weights,
-    ResNet50_Weights,
-    densenet121,
-    resnet50,
-)
+from torchvision.models import DenseNet121_Weights, ResNet50_Weights, densenet121, resnet50
 
 import src.constants
+from src.models.IDensenet.resflow import ResidualFlow
+from src.models.IResnet.conv_iResNet import conv_iResNet as iResNet
 
-from .IResnet.conv_iResNet import conv_iResNet as iResNet
-
-from .IDensenet.resflow import ResidualFlow
-import IDensenet.layers as layers
+from .IDensenet import layers
 
 
 class Net(nn.Module):
@@ -41,16 +35,12 @@ class Net(nn.Module):
         # in , train_img.py
         if network == "idensenet":
             self.model = ResidualFlow(
-                input_size=tuple(
-                    [src.constants.BATCH_SIZE] + [src.constants.DEFAULT_IN_SHAPE]
-                ),
+                input_size=tuple([src.constants.BATCH_SIZE] + [src.constants.DEFAULT_IN_SHAPE]),
                 n_blocks=list(map(int, "16-16-16".split("-"))),
                 intermediate_dim=512,
                 factor_out=False,
                 quadratic=False,
-                init_layer=layers.Normalize(
-                    (0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)
-                ),
+                init_layer=layers.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
                 actnorm=True,
                 fc_actnorm=False,
                 batchnorm=False,
@@ -74,8 +64,7 @@ class Net(nn.Module):
                 grad_in_forward=True,
                 first_resblock=True,
                 learn_p=False,
-                classification=src.constants.IDENSENET_TASK
-                in ["classification", "hybrid"],
+                classification=src.constants.IDENSENET_TASK in ["classification", "hybrid"],
                 classification_hdim=256,
                 n_classes=num_classes,
                 block_type="resblock",
@@ -87,9 +76,7 @@ class Net(nn.Module):
                 lip_coeff=0.98,
             )
 
-            self.__last_layer_name = (
-                "logit_layer"  # last layer for classification is already added
-            )
+            self.__last_layer_name = "logit_layer"  # last layer for classification is already added
 
         # in get_model(), CIFAR_main.py
         # default values from argument parser definition
@@ -113,9 +100,7 @@ class Net(nn.Module):
             )
             # TODO: Double-check if this is the final layer
             if not self.model.logits:
-                raise TypeError(
-                    f"Type of final network layer is {type(None)}, expected {type(nn.Linear)}"
-                )
+                raise TypeError(f"Type of final network layer is {type(None)}, expected {type(nn.Linear)}")
 
             self.__last_layer_name = "logits"
 
@@ -124,9 +109,7 @@ class Net(nn.Module):
             self.__last_layer_name = "fc"
 
         elif network == "densenet":
-            self.model = densenet121(
-                weights=DenseNet121_Weights.DEFAULT, in_shape=in_shape
-            )
+            self.model = densenet121(weights=DenseNet121_Weights.DEFAULT, in_shape=in_shape)
             self.__last_layer_name = "classifier"
         else:
             raise ValueError(
@@ -134,9 +117,7 @@ class Net(nn.Module):
                 "expected one of: 'resnet', 'densenet', 'iresnet', 'idensenet"
             )
 
-        in_features = (
-            in_features or getattr(self.model, self.__last_layer_name).in_features
-        )
+        in_features = in_features or getattr(self.model, self.__last_layer_name).in_features
 
         setattr(self.model, self.__last_layer_name, nn.Linear(in_features, num_classes))
 

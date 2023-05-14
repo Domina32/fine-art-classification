@@ -1,9 +1,8 @@
-from torch._six import container_abcs
+import collections.abc as container_abcs
 from itertools import repeat
 
 
 def _ntuple(n):
-
     def parse(x):
         if isinstance(x, container_abcs.Iterable):
             return x
