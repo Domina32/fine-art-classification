@@ -35,7 +35,7 @@ class Net(nn.Module):
         # in , train_img.py
         if network == "idensenet":
             self.model = ResidualFlow(
-                input_size=tuple([src.constants.BATCH_SIZE] + [src.constants.DEFAULT_IN_SHAPE]),
+                input_size=(src.constants.BATCH_SIZE, *src.constants.DEFAULT_IN_SHAPE),
                 n_blocks=list(map(int, "16-16-16".split("-"))),
                 intermediate_dim=512,
                 factor_out=False,
@@ -47,7 +47,7 @@ class Net(nn.Module):
                 dropout=0.0,
                 fc=False,
                 coeff=0.98,
-                vnorms=2222,
+                vnorms="2222",
                 n_lipschitz_iters=None,
                 sn_atol=1e-3,
                 sn_rtol=1e-3,
