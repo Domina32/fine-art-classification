@@ -1,3 +1,5 @@
+from typing import Literal
+
 import cv2
 import numpy as np
 import torchvision
@@ -33,10 +35,12 @@ def change_channels(img):
 # WGA
 
 
-def label_mapping(label):
-    lbl = 0
+def label_mapping(label) -> Literal[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]:
+    lbl = -1
 
-    if label == "portrait":
+    if label == "religious":
+        lbl = 0
+    elif label == "portrait":
         lbl = 1
     elif label == "landscape":
         lbl = 2
