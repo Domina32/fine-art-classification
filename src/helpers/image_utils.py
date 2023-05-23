@@ -9,10 +9,10 @@ from skimage import io
 # COMMON
 
 
-# def resize_img(img, new_width=300, new_height=300):
-#     """Resize an image using new  width and height"""
-#     new_points = (new_width, new_height)
-#     return cv2.resize(img, new_points, interpolation=cv2.INTER_LINEAR)
+def resize_img_cv2(img, new_width=300, new_height=300):
+    """Resize an image using new  width and height"""
+    new_points = (new_width, new_height)
+    return cv2.resize(img, new_points, interpolation=cv2.INTER_LINEAR)
 
 
 def resize_img(img, new_width=300, new_height=300):
@@ -76,12 +76,12 @@ def load_img(URL):
 def url_to_numpy(url):
     try:
         img = load_img(url)
-        resized_img = resize_img(img)
+        resized_img = resize_img_cv2(img)
         numpy_img = np.expand_dims(resized_img[:, :, :-1], axis=0)[:, :, :, ::-1]
 
         assert numpy_img.shape[-1] == 3
 
         return numpy_img
 
-    except Exception:
+    except Exception as e:
         pass

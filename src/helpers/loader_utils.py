@@ -1,14 +1,27 @@
+import os
 from typing import Literal, Optional, Union
 
 import matplotlib.pyplot as plt
+import pandas as pd
 from numpy import uint8
 from numpy.typing import NDArray
 from torch import Tensor
 from torch.utils.data import DataLoader
 
-from ..dataloader.dataloader import split_dataset
-from ..dataloader.wga_generator.custom_wga_dataset import CustomWgaDataset
-from ..dataloader.wikiart_generator.custom_wikiart_dataset import CustomWikiartDataset
+from src.dataloader.dataloader import split_dataset
+from src.dataloader.wga_generator.custom_wga_dataset import CustomWgaDataset
+from src.dataloader.wikiart_generator.custom_wikiart_dataset import CustomWikiartDataset
+from src.helpers.image_utils import label_mapping
+
+
+def paintings_label_mapping():
+    path = "./data/wga/"
+    paintings = pd.read_csv(os.path.join(path, "paintings.csv"))
+    paintings["encoded_TYPE"] = paintings["TYPE"].map(label_mapping)
+    print("Paintings label mapping done")
+
+    temp = paintings[["new_URL", "encoded_TYPE"]].copy()
+    temp.to_csv(os.path.join(path, "temp.csv"), index=False)
 
 
 def get_dataloader(
