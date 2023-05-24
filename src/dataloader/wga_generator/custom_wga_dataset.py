@@ -2,6 +2,7 @@ import os
 from pathlib import Path, PurePath
 from typing import Literal, Optional
 
+import pandas as pd
 import numpy as np
 import torch
 from torchvision.transforms import functional as fn
@@ -11,6 +12,63 @@ from ..dataloader import CustomDataset
 DATA_PATH = "wga"
 current_dir = Path(__file__).parent.parent
 local_DATA_PATH = os.path.join(current_dir.parent.parent, "data")
+wga_path = os.path.join(local_DATA_PATH, "wga")
+data_chunks_path = os.path.join(wga_path, "data_chunks")
+
+
+def make_wga_dataset_chunks():
+    print("Starting...")
+
+    NUMBER_OF_ARRAYS = 30
+    temp = pd.read_csv(os.path.join(wga_path, "temp.csv"))
+    temps = np.array_split(temp, NUMBER_OF_ARRAYS)
+
+    print("Starting data chunks")
+    for i, t in enumerate(temps):
+        if i <= -1:
+            continue
+
+        t["image_array"] = t["new_URL"].map(lambda url: url_to_numpy(url))
+        print(f"Url to npy done for chunk {i}/{NUMBER_OF_ARRAYS}")
+
+        t.dropna(inplace=True, axis=0)
+
+        images_name = f"wga_imgs_{i}.npy"
+        np.save(os.path.join(data_chunks_path, images_name), t["image_array"].values)
+
+        labels_name = f"wga_lbls_{i}.npy"
+        np.save(os.path.join(data_chunks_path, labels_name), t["encoded_TYPE"].values)
+
+        print(f"Saved data chunk index: {i}/{NUMBER_OF_ARRAYS}")
+
+
+def merge_wga_chunks():
+    NUMBER_OF_ARRAYS = 30
+
+    x = np.load(os.path.join(data_chunks_path, "wga_imgs_0.npy"), allow_pickle=True)
+    print(f"loaded first chunk: {x}")
+    all_images = np.array([np.squeeze(xx) for xx in x])
+
+    all_labels = np.load(
+        os.path.join(data_chunks_path, "wga_lbls_0.npy"), allow_pickle=True
+    )
+
+    for i in range(1, NUMBER_OF_ARRAYS):
+        x = np.load(
+            os.path.join(data_chunks_path, f"wga_imgs_{i}.npy"), allow_pickle=True
+        )
+        print(f"loaded chunk {i}: {x}")
+        images_array = np.array([np.squeeze(xx) for xx in x])
+        all_images = np.append(all_images, images_array, axis=0)
+
+        labels_array = np.load(
+            os.path.join(data_chunks_path, f"wga_lbls_{i}.npy"), allow_pickle=True
+        )
+        all_labels = np.append(all_labels, labels_array)
+        print(f"len of all_labels = {len(all_labels)}")
+
+    np.save(os.path.join(wga_path, "wga_images.npy"), all_images)
+    np.save(os.path.join(wga_path, "wga_labels.npy"), all_labels)
 
 
 class CustomWgaDataset(CustomDataset):
@@ -23,15 +81,21 @@ class CustomWgaDataset(CustomDataset):
 
         self.__data_path = PurePath(local_DATA_PATH, DATA_PATH)
         self.__data: dict[Literal["images", "labels"], np.ndarray] = {
-            "images": np.load(os.path.join(self.__data_path, "wga_images.npy"), mmap_mode="r"),
-            "labels": np.load(os.path.join(self.__data_path, "wga_labels.npy"), mmap_mode="r"),
+            "images": np.load(
+                os.path.join(self.__data_path, "wga_images.npy"), mmap_mode="r"
+            ),
+            "labels": np.load(
+                os.path.join(self.__data_path, "wga_labels.npy"), mmap_mode="r"
+            ),
         }
 
         labels_length = len(self.__data["labels"])
         images_length = len(self.__data["images"])
 
         if labels_length != images_length:
-            raise ValueError(f"Length of labels ({labels_length}) and images ({images_length}) is mismatched")
+            raise ValueError(
+                f"Length of labels ({labels_length}) and images ({images_length}) is mismatched"
+            )
 
         self.__length = labels_length
 
@@ -40,7 +104,10 @@ class CustomWgaDataset(CustomDataset):
 
     def __getitem__(self, key):
         # return (fn.to_tensor(self.__data["images"][key]), self.__data["labels"][key])
-        return (fn.to_tensor(self.__data["images"][key]), torch.tensor(self.__data["labels"][key]))
+        return (
+            fn.to_tensor(self.__data["images"][key]),
+            torch.tensor(self.__data["labels"][key]),
+        )
         # return torch.nested.nested_tensor([fn.to_tensor(self.__data["images"][key]), self.__data["labels"][key]])
 
     def __iter__(self):
@@ -51,7 +118,9 @@ class CustomWgaDataset(CustomDataset):
             slice_end = np.min((slice_start + self.chunk_size, self.__length))
             image_arrays = np.empty((self.chunk_size, *self.in_shape), dtype=np.uint8)
 
-            for index, image_array in enumerate(self.__data["images"][slice_start:slice_end]):
+            for index, image_array in enumerate(
+                self.__data["images"][slice_start:slice_end]
+            ):
                 tensor = fn.to_tensor(image_array)
                 image_arrays[index] = tensor
 
@@ -75,7 +144,9 @@ class CustomWgaDataset(CustomDataset):
         images_length = len(self.__data["images"])
 
         if labels_length != images_length:
-            raise ValueError(f"New length of labels ({labels_length}) and images ({images_length}) is mismatched")
+            raise ValueError(
+                f"New length of labels ({labels_length}) and images ({images_length}) is mismatched"
+            )
 
         self.__length = labels_length
 
