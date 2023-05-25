@@ -2,12 +2,13 @@ import os
 from pathlib import Path, PurePath
 from typing import Literal, Optional
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 import torch
 from torchvision.transforms import functional as fn
 
-from ..dataloader import CustomDataset
+from src.dataloader.dataloader import CustomDataset
+from src.helpers.image_utils import url_to_numpy
 
 DATA_PATH = "wga"
 current_dir = Path(__file__).parent.parent
@@ -17,6 +18,11 @@ data_chunks_path = os.path.join(wga_path, "data_chunks")
 
 
 def make_wga_dataset_chunks():
+    """
+    Create wga data chunks and resize images.
+    Resizing is done in resize_img() which accepts
+    _extended_summary_
+    """
     print("Starting...")
 
     NUMBER_OF_ARRAYS = 30
@@ -43,27 +49,24 @@ def make_wga_dataset_chunks():
 
 
 def merge_wga_chunks():
+    """
+    Merge chunks of wga dataset into a full set of images and labels.
+    """
     NUMBER_OF_ARRAYS = 30
 
     x = np.load(os.path.join(data_chunks_path, "wga_imgs_0.npy"), allow_pickle=True)
-    print(f"loaded first chunk: {x}")
+    print("Loaded first chunk")
     all_images = np.array([np.squeeze(xx) for xx in x])
 
-    all_labels = np.load(
-        os.path.join(data_chunks_path, "wga_lbls_0.npy"), allow_pickle=True
-    )
+    all_labels = np.load(os.path.join(data_chunks_path, "wga_lbls_0.npy"), allow_pickle=True)
 
     for i in range(1, NUMBER_OF_ARRAYS):
-        x = np.load(
-            os.path.join(data_chunks_path, f"wga_imgs_{i}.npy"), allow_pickle=True
-        )
-        print(f"loaded chunk {i}: {x}")
+        x = np.load(os.path.join(data_chunks_path, f"wga_imgs_{i}.npy"), allow_pickle=True)
+        print(f"Loaded chunk {i}")
         images_array = np.array([np.squeeze(xx) for xx in x])
         all_images = np.append(all_images, images_array, axis=0)
 
-        labels_array = np.load(
-            os.path.join(data_chunks_path, f"wga_lbls_{i}.npy"), allow_pickle=True
-        )
+        labels_array = np.load(os.path.join(data_chunks_path, f"wga_lbls_{i}.npy"), allow_pickle=True)
         all_labels = np.append(all_labels, labels_array)
         print(f"len of all_labels = {len(all_labels)}")
 
@@ -81,21 +84,15 @@ class CustomWgaDataset(CustomDataset):
 
         self.__data_path = PurePath(local_DATA_PATH, DATA_PATH)
         self.__data: dict[Literal["images", "labels"], np.ndarray] = {
-            "images": np.load(
-                os.path.join(self.__data_path, "wga_images.npy"), mmap_mode="r"
-            ),
-            "labels": np.load(
-                os.path.join(self.__data_path, "wga_labels.npy"), mmap_mode="r"
-            ),
+            "images": np.load(os.path.join(self.__data_path, "wga_images.npy"), mmap_mode="r"),
+            "labels": np.load(os.path.join(self.__data_path, "wga_labels.npy"), mmap_mode="r"),
         }
 
         labels_length = len(self.__data["labels"])
         images_length = len(self.__data["images"])
 
         if labels_length != images_length:
-            raise ValueError(
-                f"Length of labels ({labels_length}) and images ({images_length}) is mismatched"
-            )
+            raise ValueError(f"Length of labels ({labels_length}) and images ({images_length}) is mismatched")
 
         self.__length = labels_length
 
@@ -118,9 +115,7 @@ class CustomWgaDataset(CustomDataset):
             slice_end = np.min((slice_start + self.chunk_size, self.__length))
             image_arrays = np.empty((self.chunk_size, *self.in_shape), dtype=np.uint8)
 
-            for index, image_array in enumerate(
-                self.__data["images"][slice_start:slice_end]
-            ):
+            for index, image_array in enumerate(self.__data["images"][slice_start:slice_end]):
                 tensor = fn.to_tensor(image_array)
                 image_arrays[index] = tensor
 
@@ -144,9 +139,7 @@ class CustomWgaDataset(CustomDataset):
         images_length = len(self.__data["images"])
 
         if labels_length != images_length:
-            raise ValueError(
-                f"New length of labels ({labels_length}) and images ({images_length}) is mismatched"
-            )
+            raise ValueError(f"New length of labels ({labels_length}) and images ({images_length}) is mismatched")
 
         self.__length = labels_length
 

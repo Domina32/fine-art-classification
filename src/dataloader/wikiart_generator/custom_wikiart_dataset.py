@@ -1,13 +1,24 @@
 from pathlib import Path
 from typing import Optional
 
-from datasets import DatasetDict, load_dataset
+from datasets import Dataset, DatasetDict, load_dataset
 from torchvision.transforms import functional as fn
 
-from ...helpers.image_utils import resize_img
-from ..dataloader import CustomDataset
+from src.dataloader.dataloader import CustomDataset
+from src.helpers.image_utils import resize_img
 
 local_FILE_LENGTH_MAP_JSON_PATH = Path(__file__).parent
+
+
+def export_wikiart_labels():
+    dataset = load_dataset("huggan/wikiart", cache_dir="./data/wikiart/labels")
+    labels = dataset["train"].remove_columns("image")
+    labels.save_to_disk("./data/wikiart/labels")
+
+
+def save_wikiart_labels_as_dataframe():
+    labels = Dataset.load_from_disk("./data/wikiart/labels")
+    labels.to_pandas().to_csv("./data/wikiart/labels/labels.csv", index=False)
 
 
 class CustomWikiartDataset(CustomDataset):
@@ -18,7 +29,8 @@ class CustomWikiartDataset(CustomDataset):
     ):
         super().__init__(chosen_label=chosen_label, chunk_size=chunk_size)
 
-        dataset = load_dataset("huggan/wikiart", cache_dir="./data/wikiart/")
+        dataset = load_dataset("huggan/wikiart", cache_dir="./data/wikiart/dataset")
+
         if isinstance(dataset, DatasetDict):
             dataset = dataset["train"]
             column_names_to_remove = [

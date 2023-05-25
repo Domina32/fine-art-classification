@@ -3,13 +3,15 @@ import sys
 
 sys.path.append(os.path.abspath(os.path.join(".", "src", "models", "IDensenet")))
 
-from src.helpers.device_utils import Device
-from src.dataloader.wga_generator.custom_wga_dataset import (
-    make_wga_dataset_chunks,
-    merge_wga_chunks,
-)
-
 import warnings
+
+from src.helpers.device_utils import Device
+
+# from src.dataloader.wga_generator.custom_wga_dataset import (
+#     make_wga_dataset_chunks,
+#     merge_wga_chunks,
+# )
+
 
 warnings.filterwarnings("ignore")
 
@@ -52,8 +54,6 @@ def main():
     # trainer.run(training_loader, max_epochs=NUM_EPOCHS)
 
     # logger.close()
-
-    merge_wga_chunks()
 
 
 if __name__ == "__main__":

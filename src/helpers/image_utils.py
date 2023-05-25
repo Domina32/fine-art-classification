@@ -1,5 +1,3 @@
-from typing import Literal
-
 import cv2
 import numpy as np
 import torchvision
@@ -7,6 +5,10 @@ import torchvision.transforms.functional as fn
 from skimage import io
 
 # COMMON
+
+
+def class_distribution_to_png(png_path="./data/plots"):
+    return
 
 
 def resize_img_cv2(img, new_width=300, new_height=300):
@@ -35,7 +37,7 @@ def change_channels(img):
 # WGA
 
 
-def label_mapping(label) -> Literal[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]:
+def label_mapping(label):
     lbl = -1
 
     if label == "religious":
@@ -83,5 +85,5 @@ def url_to_numpy(url):
 
         return numpy_img
 
-    except Exception as e:
+    except Exception:
         pass
