@@ -1,24 +1,14 @@
 from pathlib import Path
 from typing import Optional
 
-from datasets import Dataset, DatasetDict, load_dataset
 from torchvision.transforms import functional as fn
 
+from datasets.dataset_dict import DatasetDict
+from datasets.load import load_dataset
 from src.dataloader.dataloader import CustomDataset
 from src.helpers.image_utils import resize_img
 
 local_FILE_LENGTH_MAP_JSON_PATH = Path(__file__).parent
-
-
-def export_wikiart_labels():
-    dataset = load_dataset("huggan/wikiart", cache_dir="./data/wikiart/labels")
-    labels = dataset["train"].remove_columns("image")
-    labels.save_to_disk("./data/wikiart/labels")
-
-
-def save_wikiart_labels_as_dataframe():
-    labels = Dataset.load_from_disk("./data/wikiart/labels")
-    labels.to_pandas().to_csv("./data/wikiart/labels/labels.csv", index=False)
 
 
 class CustomWikiartDataset(CustomDataset):

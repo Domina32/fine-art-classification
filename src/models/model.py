@@ -35,7 +35,7 @@ class Net(nn.Module):
         # in , train_img.py
         if network == "idensenet":
             self.model = ResidualFlow(
-                input_size=(src.constants.BATCH_SIZE, *src.constants.DEFAULT_IN_SHAPE),
+                input_size=(src.constants.BATCH_SIZE, *in_shape),
                 n_blocks=list(map(int, "16-16-16".split("-"))),
                 intermediate_dim=512,
                 factor_out=False,
@@ -44,14 +44,14 @@ class Net(nn.Module):
                 actnorm=True,
                 fc_actnorm=False,
                 batchnorm=False,
-                dropout=0.0,
+                dropout=0,
                 fc=False,
                 coeff=0.98,
                 vnorms="2222",
                 n_lipschitz_iters=None,
                 sn_atol=1e-3,
                 sn_rtol=1e-3,
-                n_power_series=None,
+                # n_power_series=int,
                 n_dist="poisson",
                 n_samples=1,
                 kernels="3-1-3",
@@ -109,7 +109,7 @@ class Net(nn.Module):
             self.__last_layer_name = "fc"
 
         elif network == "densenet":
-            self.model = densenet121(weights=DenseNet121_Weights.DEFAULT, in_shape=in_shape)
+            self.model = densenet121(weights=DenseNet121_Weights.DEFAULT)
             self.__last_layer_name = "classifier"
         else:
             raise ValueError(
@@ -149,9 +149,7 @@ class Net(nn.Module):
         print("Initialized.")
 
     def to(self, device: torch.device):
-        if not isinstance(self.model, iResNet):
-            self.model.to(device)
-        self.model.cuda()
+        self.model.to(device)
 
         self.__device = device
 

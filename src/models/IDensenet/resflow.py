@@ -2,8 +2,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-import layers as layers
-import layers.base as base_layers
+from . import layers
+from .layers import base as base_layers
 
 ACT_FNS = {
     "softplus": lambda b: nn.Softplus(),
@@ -102,10 +102,7 @@ class ResidualFlow(nn.Module):
         self.lip_coeff = lip_coeff
 
         if not self.n_scale > 0:
-            raise ValueError(
-                "Could not compute number of scales for input of"
-                "size (%d,%d,%d,%d)" % input_size
-            )
+            raise ValueError("Could not compute number of scales for input of" "size (%d,%d,%d,%d)" % input_size)
 
         self.transforms = self._build_net(input_size)
 
@@ -117,11 +114,7 @@ class ResidualFlow(nn.Module):
     def _build_net(self, input_size):
         _, c, h, w = input_size
         transforms = []
-        _stacked_blocks = (
-            StackediResBlocks
-            if self.block_type == "resblock"
-            else StackedCouplingBlocks
-        )
+        _stacked_blocks = StackediResBlocks if self.block_type == "resblock" else StackedCouplingBlocks
         for i in range(self.n_scale):
             transforms.append(
                 _stacked_blocks(
@@ -211,9 +204,7 @@ class ResidualFlow(nn.Module):
                 )
             )
         self.classification_heads = nn.ModuleList(classification_heads)
-        self.logit_layer = nn.Linear(
-            self.classification_hdim * len(classification_heads), self.n_classes
-        )
+        self.logit_layer = nn.Linear(self.classification_hdim * len(classification_heads), self.n_classes)
 
     def forward(self, x, logpx=None, inverse=False, classify=False):
         if inverse:
@@ -397,9 +388,7 @@ class StackediResBlocks(layers.SequentialFlow):
                 if densenet:
                     ks = list(map(int, kernels.split("-")))
                     if learn_p:
-                        _domains = [
-                            nn.Parameter(torch.tensor(0.0)) for _ in range(len(ks))
-                        ]
+                        _domains = [nn.Parameter(torch.tensor(0.0)) for _ in range(len(ks))]
                         _codomains = _domains[1:] + [_domains[0]]
                     else:
                         _domains = domains
@@ -438,11 +427,7 @@ class StackediResBlocks(layers.SequentialFlow):
                             part_net.append(layers.MovingBatchNorm2d(densenet_growth))
                         part_net.append(ACT_FNS[activation_fn](False))
 
-                        nnet.append(
-                            layers.LipschitzDenseLayer(
-                                nn.Sequential(*part_net), learnable_concat, lip_coeff
-                            )
-                        )
+                        nnet.append(layers.LipschitzDenseLayer(nn.Sequential(*part_net), learnable_concat, lip_coeff))
 
                         total_in_channels += densenet_growth
 
@@ -477,9 +462,7 @@ class StackediResBlocks(layers.SequentialFlow):
                 else:
                     ks = list(map(int, kernels.split("-")))
                     if learn_p:
-                        _domains = [
-                            nn.Parameter(torch.tensor(0.0)) for _ in range(len(ks))
-                        ]
+                        _domains = [nn.Parameter(torch.tensor(0.0)) for _ in range(len(ks))]
                         _codomains = _domains[1:] + [_domains[0]]
                     else:
                         _domains = domains
@@ -584,11 +567,7 @@ class StackediResBlocks(layers.SequentialFlow):
             for i in range(n_blocks):
                 if quadratic:
                     chain.append(_quadratic_layer(initial_size, fc))
-                chain.append(
-                    _resblock(
-                        initial_size, fc, first_resblock=first_resblock and (i == 0)
-                    )
-                )
+                chain.append(_resblock(initial_size, fc, first_resblock=first_resblock and (i == 0)))
                 if actnorm:
                     chain.append(_actnorm(initial_size, fc))
                 if fc_actnorm:
@@ -741,11 +720,7 @@ class FCNet(nn.Module):
 
                 part_net.append(ACT_FNS[activation_fn](True))
 
-                nnet.append(
-                    layers.LipschitzDenseLayer(
-                        torch.nn.Sequential(*part_net), learnable_concat, lip_coeff
-                    )
-                )
+                nnet.append(layers.LipschitzDenseLayer(torch.nn.Sequential(*part_net), learnable_concat, lip_coeff))
 
                 total_in_channels += fc_densenet_growth
 
@@ -902,11 +877,7 @@ class StackedCouplingBlocks(layers.SequentialFlow):
                     if batchnorm:
                         nnet.append(layers.MovingBatchNorm2d(initial_size[0]))
                     nnet.append(ACT_FNS[activation_fn](False))
-                nnet.append(
-                    _weight_layer(fc)(
-                        initial_size[0] // div_in, idim, ks[0], 1, ks[0] // 2
-                    )
-                )
+                nnet.append(_weight_layer(fc)(initial_size[0] // div_in, idim, ks[0], 1, ks[0] // 2))
                 if batchnorm:
                     nnet.append(layers.MovingBatchNorm2d(idim))
                 nnet.append(ACT_FNS[activation_fn](True))
@@ -917,17 +888,11 @@ class StackedCouplingBlocks(layers.SequentialFlow):
                     nnet.append(ACT_FNS[activation_fn](True))
                 if dropout:
                     nnet.append(nn.Dropout2d(dropout, inplace=True))
-                nnet.append(
-                    _weight_layer(fc)(
-                        idim, initial_size[0] * mult_out, ks[-1], 1, ks[-1] // 2
-                    )
-                )
+                nnet.append(_weight_layer(fc)(idim, initial_size[0] * mult_out, ks[-1], 1, ks[-1] // 2))
                 if batchnorm:
                     nnet.append(layers.MovingBatchNorm2d(initial_size[0]))
 
-                return _block(
-                    initial_size[0], nn.Sequential(*nnet), mask_type=_mask_type
-                )
+                return _block(initial_size[0], nn.Sequential(*nnet), mask_type=_mask_type)
 
         if init_layer is not None:
             chain.append(init_layer)
@@ -941,11 +906,7 @@ class StackedCouplingBlocks(layers.SequentialFlow):
             for i in range(n_blocks):
                 if quadratic:
                     chain.append(_quadratic_layer(initial_size, fc))
-                chain.append(
-                    _resblock(
-                        initial_size, fc, first_resblock=first_resblock and (i == 0)
-                    )
-                )
+                chain.append(_resblock(initial_size, fc, first_resblock=first_resblock and (i == 0)))
                 if actnorm:
                     chain.append(_actnorm(initial_size, fc))
                 if fc_actnorm:

@@ -27,6 +27,7 @@ def make_wga_dataset_chunks():
 
     NUMBER_OF_ARRAYS = 30
     temp = pd.read_csv(os.path.join(wga_path, "temp.csv"))
+    # TODO: Fix types
     temps = np.array_split(temp, NUMBER_OF_ARRAYS)
 
     print("Starting data chunks")
@@ -34,16 +35,15 @@ def make_wga_dataset_chunks():
         if i <= -1:
             continue
 
-        t["image_array"] = t["new_URL"].map(lambda url: url_to_numpy(url))
+        t["image_array"] = t["new_URL"].map(lambda url: url_to_numpy(url))  # type: ignore
         print(f"Url to npy done for chunk {i}/{NUMBER_OF_ARRAYS}")
-
-        t.dropna(inplace=True, axis=0)
+        t.dropna(inplace=True, axis=0)  # type: ignore
 
         images_name = f"wga_imgs_{i}.npy"
-        np.save(os.path.join(data_chunks_path, images_name), t["image_array"].values)
+        np.save(os.path.join(data_chunks_path, images_name), t["image_array"].values)  # type: ignore
 
         labels_name = f"wga_lbls_{i}.npy"
-        np.save(os.path.join(data_chunks_path, labels_name), t["encoded_TYPE"].values)
+        np.save(os.path.join(data_chunks_path, labels_name), t["encoded_TYPE"].values)  # type: ignore
 
         print(f"Saved data chunk index: {i}/{NUMBER_OF_ARRAYS}")
 

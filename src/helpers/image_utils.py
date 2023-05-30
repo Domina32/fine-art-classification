@@ -1,3 +1,4 @@
+import av.error
 import cv2
 import numpy as np
 import torchvision
@@ -84,6 +85,5 @@ def url_to_numpy(url):
         assert numpy_img.shape[-1] == 3
 
         return numpy_img
-
-    except Exception:
+    except av.InvalidDataError:  # type: ignore
         pass

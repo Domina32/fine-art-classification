@@ -15,7 +15,7 @@ from src.helpers.image_utils import label_mapping
 
 
 def paintings_label_mapping():
-    path = "./data/wga/"
+    path = os.path.join(".", "data", "wga")
     paintings = pd.read_csv(os.path.join(path, "paintings.csv"))
     paintings["encoded_TYPE"] = paintings["TYPE"].map(label_mapping)
     print("Paintings label mapping done")
